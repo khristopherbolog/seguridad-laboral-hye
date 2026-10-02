@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Generador de QR — Clínica Dental Hye</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  body { font-family: Arial, sans-serif; background:#f2f2f2; padding:24px; }
+  .panel { max-width:420px; margin:0 auto 24px; background:#fff; border-radius:12px; padding:20px; box-shadow:0 4px 14px rgba(0,0,0,.1); }
+  label { display:block; font-size:13px; font-weight:bold; margin:10px 0 4px; }
+  input, select { width:100%; padding:8px; border:1px solid #ccc; border-radius:6px; font-size:14px; box-sizing:border-box; }
+  button { margin-top:14px; width:100%; padding:10px; border:none; border-radius:6px; background:#111; color:#fff; font-weight:bold; font-size:14px; cursor:pointer; }
+  button.secundario { background:#555; margin-top:8px; }
+  #salida { text-align:center; }
+  #qrHidden { position:absolute; left:-9999px; top:-9999px; }
+  canvas { max-width:100%; border:1px solid #ddd; margin-top:16px; }
+  .fila { display:flex; gap:8px; }
+  .fila > div { flex:1; }
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <h2 style="margin-top:0;">Generador de QR personalizado</h2>
+  <p style="font-size:13px;color:#555;">Herramienta interna para generar/regenerar el QR de "Seguridad Laboral — Clínica Dental Hye". Requiere conexión a internet (carga una librería JS estándar desde cdnjs). El QR resultante es <strong>estático</strong>: una vez descargado, funciona sin depender de ningún servicio externo.</p>
+
+  <label for="url">URL de destino</label>
+  <input id="url" type="text" value="https://claude.ai/code/artifact/7d79728f-6e50-4826-a445-8deef906cf14">
+
+  <div class="fila">
+    <div>
+      <label for="colorPrincipal">Color principal</label>
+      <input id="colorPrincipal" type="color" value="#111111">
+    </div>
+    <div>
+      <label for="colorFondo">Color de fondo</label>
+      <input id="colorFondo" type="color" value="#ffffff">
+    </div>
+  </div>
+
+  <label for="textoSuperior">Texto superior</label>
+  <input id="textoSuperior" type="text" value="SEGURIDAD Y EMERGENCIAS">
+
+  <label for="textoInferior">Texto inferior</label>
+  <input id="textoInferior" type="text" value="Escanea para consultar protocolos">
+
+  <label for="tamanoLogo">Tamaño del logo central (% del ancho del QR)</label>
+  <input id="tamanoLogo" type="range" min="0" max="26" value="20">
+
+  <button id="btnGenerar">Generar QR</button>
+</div>
+
+<div id="qrHidden"></div>
+
+<div class="panel" id="salida" style="display:none;">
+  <canvas id="lienzoCompleto"></canvas>
+  <div>
+    <button id="btnDescargarPngCompleto">⬇️ Descargar PNG (con marco, alta resolución)</button>
+    <button class="secundario" id="btnDescargarSvgCompleto">⬇️ Descargar SVG (con marco, para impresión)</button>
+  </div>
+  <canvas id="lienzoSimple" style="margin-top:28px;"></canvas>
+  <div>
+    <button class="secundario" id="btnDescargarPngSimple">⬇️ Descargar PNG fondo blanco (sin marco)</button>
+  </div>
+  <p id="resultadoVerificacion" style="font-size:13px;color:#1e8f4e;font-weight:bold;"></p>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  var ESCALA = 10;        // píxeles por módulo en el lienzo de alta resolución
+  var MODULOS_MARGEN = 4;  // zona de silencio mínima recomendada (en módulos)
+
+  function construirMatriz(texto) {
+    var contenedor = document.getElementById("qrHidden");
+    contenedor.innerHTML = "";
+    var qr = new QRCode(contenedor, {
+      text: texto,
+      correctLevel: QRCode.CorrectLevel.H
+    });
+    var modelo = qr._oQRCode;
+    var n = modelo.getModuleCount();
+    var matriz = [];
+    for (var r = 0; r < n; r++) {
+      var fila = [];
+      for (var c = 0; c < n; c++) fila.push(modelo.isDark(r, c));
+      matriz.push(fila);
+    }
+    return matriz;
+  }
+
+  function esFinder(r, c, n) {
+    // Las 3 esquinas de 7x7 (buscador de posición) se mantienen como cuadrados
+    // perfectos, sin redondear, para maximizar la fiabilidad de lectura.
+    function dentro(r0, c0) { return r >= r0 && r < r0 + 7 && c >= c0 && c < c0 + 7; }
+    return dentro(0, 0) || dentro(0, n - 7) || dentro(n - 7, 0);
+  }
+
+  function dibujarQR(ctx, matriz, opciones) {
+    var n = matriz.length;
+    var escala = opciones.escala;
+    var margenPx = MODULOS_MARGEN * escala;
+    var ladoQR = n * escala;
+    var lado = ladoQR + margenPx * 2;
+
+    ctx.canvas.width = lado;
+    ctx.canvas.height = lado;
+
+    // Fondo
+    ctx.fillStyle = opciones.colorFondo;
+    ctx.fillRect(0, 0, lado, lado);
+
+    ctx.fillStyle = opciones.colorPrincipal;
+
+    // Zona a limpiar para el logo central (en módulos, centrada)
+    var logoModulos = Math.floor(n * opciones.logoPorcentaje / 100);
+    var inicioLogo = Math.floor((n - logoModulos) / 2);
+    var finLogo = inicioLogo + logoModulos;
+
+    for (var r = 0; r < n; r++) {
+      for (var c = 0; c < n; c++) {
+        if (!matriz[r][c]) continue;
+
+        var enZonaLogo = opciones.logoPorcentaje > 0 &&
+          r >= inicioLogo && r < finLogo && c >= inicioLogo && c < finLogo;
+        if (enZonaLogo) continue;
+
+        var x = margenPx + c * escala;
+        var y = margenPx + r * escala;
+
+        if (esFinder(r, c, n)) {
+          ctx.fillRect(x, y, escala, escala);
+        } else {
+          // módulo de datos: cuadrado redondeado ("dot" moderno)
+          var radio = escala * 0.32;
+          dibujarRectRedondeado(ctx, x, y, escala, escala, radio);
+        }
+      }
+    }
+
+    if (opciones.logoPorcentaje > 0) {
+      var cx = lado / 2;
+      var cy = lado / 2;
+      var ladoLogoPx = logoModulos * escala;
+      // Fondo blanco bajo el logo (respeta el hueco dejado en la matriz)
+      dibujarRectRedondeado(ctx, cx - ladoLogoPx / 2, cy - ladoLogoPx / 2, ladoLogoPx, ladoLogoPx, ladoLogoPx * 0.18);
+      ctx.fillStyle = opciones.colorFondo;
+      ctx.fill();
+      dibujarLogo(ctx, cx, cy, ladoLogoPx * 0.78, opciones.colorPrincipal);
+    }
+
+    return lado;
+  }
+
+  function dibujarRectRedondeado(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  // Icono de diente (placeholder del logo oficial) a modo de marca central.
+  // Sustituir por el logo real exportado como PNG/SVG cuando esté disponible.
+  var PATH_DIENTE = "M67.7984 30.4958C67.1447 32.4858 66.3152 34.4763 65.4926 36.4358 63.7224 40.6516 62.05 44.6338 62.05 48.6 62.05 52.5228 62.3557 56.1281 62.6255 59.309 62.8432 61.8749 63.0487 64.2982 63.0487 66.4142L63.0487 66.6142C63.1265 70.569 62.8471 74.5228 62.2138 78.4274 61.616 81.516 60.4096 85.1974 58.0576 85.1974 56.1339 85.1974 54.7346 83.0998 53.8987 78.9623 53.2348 74.9018 52.9562 70.7876 53.0665 66.6747L53.0665 66.414C53.0665 62.0029 53.0665 48.579 41.0793 48.579 29.0921 48.579 29.0924 62.0027 29.0924 66.4138L29.0924 66.6745C29.2026 70.7874 28.9239 74.9016 28.26 78.9621 27.424 83.0996 26.0247 85.1972 24.101 85.1972 21.749 85.1972 20.5426 81.5156 19.9448 78.4272 19.3115 74.5226 19.0321 70.5687 19.11 66.6138L19.11 66.4138C19.11 64.2978 19.3155 61.8745 19.5331 59.3086 19.8031 56.1277 20.1087 52.5224 20.1087 48.5996 20.1087 44.6338 18.4367 40.6516 16.6666 36.4355 14.9218 32.28 13.1176 27.9831 13.1176 23.8574 13.1176 17.1692 16.003 10.0224 24.1011 10.0224 26.7771 9.93002 29.4297 10.5493 31.7881 11.8171 34.6498 13.3201 37.8487 14.0651 41.08 13.9812 44.3111 14.065 47.5098 13.32 50.3713 11.8171 52.7297 10.5493 55.3823 9.93002 58.0583 10.0224 61.6693 9.87072 65.0631 11.747 66.855 14.8857 67.3289 14.375 67.7835 13.8388 68.2129 13.2739 65.981 9.86604 62.129 7.87402 58.058 8.0224 49.3691 8.0224 49.6687 11.9812 41.0797 11.9812 32.4907 11.9812 32.79 8.0224 24.1013 8.0224 15.4126 8.0224 11.1178 15.1482 11.1178 23.8574 11.1178 32.5666 18.1089 41.177 18.1089 48.6 18.1089 55.6266 17.1102 61.5648 17.1102 66.4142 17.1102 71.2636 17.0102 87.1976 24.1013 87.1976 31.1924 87.1976 31.0924 72.7482 31.0924 66.4142 31.0924 60.0802 31.8914 50.5792 41.0797 50.5792 50.268 50.5792 51.0669 60.0802 51.0669 66.4142 51.0669 72.7482 50.9669 87.1976 58.058 87.1976 65.1491 87.1976 65.0491 71.2638 65.0491 66.4142 65.0491 61.5646 64.05 55.6262 64.05 48.6 64.05 43.6476 67.1564 38.1652 69.2278 32.4787 68.7878 31.7922 68.3107 31.1302 67.7984 30.4958Z";
+
+  function dibujarLogo(ctx, cx, cy, tamano, color) {
+    var p = new Path2D(PATH_DIENTE);
+    ctx.save();
+    ctx.translate(cx - tamano / 2, cy - tamano / 2);
+    ctx.scale(tamano / 96, tamano / 96);
+    ctx.fillStyle = color;
+    ctx.fill(p);
+    ctx.restore();
+  }
+
+  function dibujarTarjetaCompleta(matriz, opciones) {
+    var canvas = document.getElementById("lienzoCompleto");
+    var ctx = canvas.getContext("2d");
+
+    var padLados = 60;
+    var padTextoSup = opciones.textoSuperior ? 90 : 30;
+    var padTextoInf = opciones.textoInferior ? 70 : 30;
+
+    var ladoQR = (matriz.length + MODULOS_MARGEN * 2) * opciones.escala;
+    var anchoTotal = ladoQR + padLados * 2;
+    var altoTotal = ladoQR + padTextoSup + padTextoInf;
+
+    canvas.width = anchoTotal;
+    canvas.height = altoTotal;
+
+    // Marco exterior
+    ctx.fillStyle = opciones.colorFondo;
+    ctx.fillRect(0, 0, anchoTotal, altoTotal);
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = opciones.colorPrincipal;
+    dibujarRectRedondeadoTrazo(ctx, 14, 14, anchoTotal - 28, altoTotal - 28, 28);
+
+    if (opciones.textoSuperior) {
+      ctx.fillStyle = opciones.colorPrincipal;
+      ctx.font = "bold 34px Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(opciones.textoSuperior, anchoTotal / 2, 56);
+    }
+
+    // Dibuja el QR en un lienzo temporal y lo copia centrado
+    var temp = document.createElement("canvas");
+    var ctxTemp = temp.getContext("2d");
+    var ladoDibujado = dibujarQR(ctxTemp, matriz, opciones);
+    var xQR = (anchoTotal - ladoDibujado) / 2;
+    var yQR = padTextoSup;
+    ctx.drawImage(temp, xQR, yQR);
+
+    if (opciones.textoInferior) {
+      ctx.fillStyle = opciones.colorPrincipal;
+      ctx.font = "600 24px Arial, sans-serif";
+      ctx.textAlign = "center";
+      ctx.fillText(opciones.textoInferior, anchoTotal / 2, altoTotal - 28);
+    }
+
+    return canvas;
+  }
+
+  function dibujarRectRedondeadoTrazo(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.stroke();
+  }
+
+  function matrizASvg(matriz, opciones) {
+    var n = matriz.length;
+    var escalaSvg = 10;
+    var margenPx = MODULOS_MARGEN * escalaSvg;
+    var lado = (n * escalaSvg) + margenPx * 2;
+
+    var logoModulos = Math.floor(n * opciones.logoPorcentaje / 100);
+    var inicioLogo = Math.floor((n - logoModulos) / 2);
+    var finLogo = inicioLogo + logoModulos;
+
+    var partes = [];
+    partes.push('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + lado + ' ' + lado + '">');
+    partes.push('<rect width="' + lado + '" height="' + lado + '" fill="' + opciones.colorFondo + '"/>');
+
+    for (var r = 0; r < n; r++) {
+      for (var c = 0; c < n; c++) {
+        if (!matriz[r][c]) continue;
+        var enZonaLogo = opciones.logoPorcentaje > 0 &&
+          r >= inicioLogo && r < finLogo && c >= inicioLogo && c < finLogo;
+        if (enZonaLogo) continue;
+
+        var x = margenPx + c * escalaSvg;
+        var y = margenPx + r * escalaSvg;
+
+        if (esFinder(r, c, n)) {
+          partes.push('<rect x="' + x + '" y="' + y + '" width="' + escalaSvg + '" height="' + escalaSvg + '" fill="' + opciones.colorPrincipal + '"/>');
+        } else {
+          var rad = (escalaSvg * 0.32).toFixed(1);
+          partes.push('<rect x="' + x + '" y="' + y + '" width="' + escalaSvg + '" height="' + escalaSvg + '" rx="' + rad + '" ry="' + rad + '" fill="' + opciones.colorPrincipal + '"/>');
+        }
+      }
+    }
+
+    if (opciones.logoPorcentaje > 0) {
+      var cx = lado / 2, cy = lado / 2;
+      var ladoLogoPx = logoModulos * escalaSvg;
+      partes.push('<rect x="' + (cx - ladoLogoPx / 2) + '" y="' + (cy - ladoLogoPx / 2) + '" width="' + ladoLogoPx + '" height="' + ladoLogoPx + '" rx="' + (ladoLogoPx * 0.18) + '" fill="' + opciones.colorFondo + '"/>');
+      var tam = ladoLogoPx * 0.78;
+      var esc = (tam / 96).toFixed(4);
+      partes.push('<g transform="translate(' + (cx - tam / 2) + ',' + (cy - tam / 2) + ') scale(' + esc + ')"><path d="' + PATH_DIENTE + '" fill="' + opciones.colorPrincipal + '"/></g>');
+    }
+
+    partes.push('</svg>');
+    return partes.join("");
+  }
+
+  function verificarLectura(canvas, textoEsperado) {
+    var ctx = canvas.getContext("2d");
+    var datos = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    var resultado = jsQR(datos.data, canvas.width, canvas.height);
+    var salida = document.getElementById("resultadoVerificacion");
+    if (resultado && resultado.data === textoEsperado) {
+      salida.style.color = "#1e8f4e";
+      salida.textContent = "✅ Verificado: el QR decodifica exactamente la URL indicada.";
+    } else if (resultado) {
+      salida.style.color = "#c0392b";
+      salida.textContent = "⚠️ El QR se decodificó pero el contenido no coincide: " + resultado.data;
+    } else {
+      salida.style.color = "#c0392b";
+      salida.textContent = "⚠️ No se pudo decodificar automáticamente (prueba reducir el tamaño del logo).";
+    }
+  }
+
+  function descargarCanvas(canvas, nombreArchivo) {
+    var enlace = document.createElement("a");
+    enlace.download = nombreArchivo;
+    enlace.href = canvas.toDataURL("image/png");
+    enlace.click();
+  }
+
+  function descargarTexto(texto, nombreArchivo, tipo) {
+    var blob = new Blob([texto], { type: tipo });
+    var url = URL.createObjectURL(blob);
+    var enlace = document.createElement("a");
+    enlace.download = nombreArchivo;
+    enlace.href = url;
+    enlace.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function generar() {
+    var url = document.getElementById("url").value.trim();
+    var opciones = {
+      escala: ESCALA,
+      colorPrincipal: document.getElementById("colorPrincipal").value,
+      colorFondo: document.getElementById("colorFondo").value,
+      textoSuperior: document.getElementById("textoSuperior").value.trim(),
+      textoInferior: document.getElementById("textoInferior").value.trim(),
+      logoPorcentaje: Number(document.getElementById("tamanoLogo").value)
+    };
+
+    var matriz = construirMatriz(url);
+
+    var canvasCompleto = dibujarTarjetaCompleta(matriz, opciones);
+
+    var canvasSimple = document.getElementById("lienzoSimple");
+    dibujarQR(canvasSimple.getContext("2d"), matriz, {
+      escala: ESCALA,
+      colorPrincipal: opciones.colorPrincipal,
+      colorFondo: "#ffffff",
+      logoPorcentaje: opciones.logoPorcentaje
+    });
+
+    document.getElementById("salida").style.display = "block";
+    window.__svgCompleto = matrizASvg(matriz, opciones);
+    window.__urlActual = url;
+
+    verificarLectura(canvasSimple, url);
+  }
+
+  function guardarEnServidor(nombre, contenido, tipo) {
+    return fetch("/guardar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ nombre: nombre, contenido: contenido, tipo: tipo })
+    }).then(function (r) { return r.text(); });
+  }
+  window.guardarEnServidor = guardarEnServidor;
+
+  document.getElementById("btnGenerar").addEventListener("click", generar);
+  document.getElementById("btnDescargarPngCompleto").addEventListener("click", function () {
+    descargarCanvas(document.getElementById("lienzoCompleto"), "qr-seguridad-hye.png");
+  });
+  document.getElementById("btnDescargarPngSimple").addEventListener("click", function () {
+    descargarCanvas(document.getElementById("lienzoSimple"), "qr-seguridad-hye-fondo-blanco.png");
+  });
+  document.getElementById("btnDescargarSvgCompleto").addEventListener("click", function () {
+    descargarTexto(window.__svgCompleto, "qr-seguridad-hye.svg", "image/svg+xml");
+  });
+
+  window.addEventListener("load", generar);
+})();
+</script>
+</body>
+</html>
