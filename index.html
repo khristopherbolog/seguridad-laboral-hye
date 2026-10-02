@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141414">
+<meta name="description" content="Protocolos de seguridad laboral, prevención de riesgos y procedimientos de emergencia de Clínica Dental Hye.">
+<meta name="robots" content="index, follow">
+<title>Seguridad Laboral · Clínica Dental Hye</title>
+<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+
+<a class="barra-emergencia" href="#contactos-emergencia">
+  🚨 EMERGENCIA EN CURSO — Pulsa aquí para ver los números de emergencia
+</a>
+
+<header class="encabezado">
+  <div class="encabezado__logo" aria-hidden="true">
+    <img src="assets/img/logo-clinica.svg" alt="">
+  </div>
+  <p class="encabezado__universidad">Clínica Dental Hye</p>
+  <h1 class="encabezado__titulo">SEGURIDAD LABORAL</h1>
+  <p class="encabezado__subtitulo">Protocolos de Seguridad y Emergencia</p>
+  <p class="encabezado__intro">Consulta rápidamente los procedimientos de prevención y actuación ante situaciones de emergencia.</p>
+</header>
+
+<main id="contenido-principal" class="contenedor">
+
+  <section class="seccion" aria-labelledby="titulo-categorias">
+    <h2 id="titulo-categorias" class="solo-lectura-pantalla">Categorías</h2>
+    <p class="seccion__ayuda" style="margin-top:0;">Selecciona una categoría</p>
+    <div class="rejilla-categorias" id="rejilla-categorias" role="list">
+      <!-- Las tarjetas se generan dinámicamente desde js/app.js (ver PROTOCOLOS) -->
+    </div>
+
+    <a class="boton-emergencia" href="#" data-abrir="contactos-emergencia">
+      📞 CONTACTOS DE EMERGENCIA
+    </a>
+  </section>
+
+  <section class="seccion" id="documentos" aria-labelledby="titulo-documentos">
+    <h2 id="titulo-documentos" class="seccion__titulo">📄 Documentos de seguridad</h2>
+    <p class="seccion__ayuda">Documentos oficiales disponibles para consulta y descarga.</p>
+    <div id="lista-documentos"><!-- generado desde js/app.js (ver DOCUMENTOS) --></div>
+  </section>
+
+</main>
+
+<!-- Vista de protocolo a pantalla completa (se reutiliza para todas las categorías) -->
+<div class="vista-protocolo" id="vista-protocolo" hidden role="dialog" aria-modal="true" aria-labelledby="vista-protocolo-titulo">
+  <div class="vista-protocolo__cabecera">
+    <button class="boton-volver" id="boton-volver" type="button">← Volver</button>
+    <h2 class="vista-protocolo__titulo" id="vista-protocolo-titulo"></h2>
+  </div>
+  <div class="vista-protocolo__cuerpo" id="vista-protocolo-cuerpo">
+    <!-- contenido inyectado por js/app.js -->
+  </div>
+</div>
+
+<!-- Visor de documento PDF a pantalla completa -->
+<div class="vista-protocolo" id="vista-documento" hidden role="dialog" aria-modal="true" aria-labelledby="vista-documento-titulo">
+  <div class="vista-protocolo__cabecera">
+    <button class="boton-volver" id="boton-volver-documento" type="button">← Volver</button>
+    <h2 class="vista-protocolo__titulo" id="vista-documento-titulo"></h2>
+  </div>
+  <div class="vista-protocolo__cuerpo">
+    <iframe class="visor-pdf" id="iframe-documento" title="Documento PDF" src=""></iframe>
+  </div>
+</div>
+
+<footer class="pie">
+  <p class="pie__linea"><strong>Proyecto académico</strong></p>
+  <p class="pie__linea">[Nombre de la Universidad]</p>
+  <p class="pie__linea">[Facultad / Carrera]</p>
+  <p class="pie__linea">[Asignatura]</p>
+  <p class="pie__linea">[Integrantes]</p>
+  <p class="pie__linea">2026</p>
+</footer>
+
+<script src="js/app.js"></script>
+</body>
+</html>
