@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#161616">
+  <meta name="description" content="Haz tu pedido online — El Rincón Nica">
+  <title>El Rincón Nica · MiMenú</title>
+  <link rel="stylesheet" href="../css/restaurante.css">
+</head>
+<body>
+
+<!-- ================================================================
+     ██████████████████████████████████████████████████████████████
+     CONFIGURACIÓN DEL RESTAURANTE
+     ──────────────────────────────────────────────────────────────
+     Edita los valores en este bloque para personalizar el menú.
+     NO modifiques los archivos CSS o JS; solo edita aquí.
+     ██████████████████████████████████████████████████████████████
+     ================================================================ -->
+<script>
+window.RESTAURANTE = {
+
+  /* ── DATOS BÁSICOS ─────────────────────────────────────────────
+     Cambia el nombre, descripción, horario y número de WhatsApp   */
+
+  nombre:      "El Rincón Nica",
+  descripcion: "Fritanga y comida típica nicaragüense en Panamá",
+
+  /* Número de WhatsApp CON código de país, SIN el signo +
+     Ejemplo Panamá: 50768001234  |  Nicaragua: 50588001234       */
+  whatsapp:    "50700000000",
+
+  horario:     "Lun – Sáb · 7:00 AM – 8:00 PM",
+
+  /* true = muestra "Abierto" en verde  |  false = "Cerrado" en rojo */
+  abierto:     true,
+
+  /* Símbolo de moneda que aparece antes de los precios            */
+  moneda:      "B/.",
+
+  /* URL de imagen de portada (banner del restaurante).
+     Deja "" para usar el fondo verde oscuro por defecto.          */
+  cover: "",
+
+
+  /* ── CATEGORÍAS Y PRODUCTOS ────────────────────────────────────
+     Estructura: categorias → array de objetos con:
+       id:       identificador único (sin espacios, sin tildes)
+       nombre:   nombre que se muestra
+       productos: array de productos con:
+         id:          identificador único del producto
+         nombre:      nombre del producto
+         precio:      precio numérico (ej: 5.50)
+         descripcion: (opcional) descripción corta
+         emoji:       (opcional) emoji personalizado
+         imagen:      (opcional) URL de foto del producto          */
+
+  categorias: [
+
+    /* ─── CATEGORÍA 1 ──────────────────────────────────────── */
+    {
+      id: "comida-completa",
+      nombre: "Comida Completa",
+      productos: [
+        { id: "cc01", nombre: "Carne asada",                    precio: 7.00 },
+        { id: "cc02", nombre: "Pechuga Asada",                  precio: 6.00 },
+        { id: "cc03", nombre: "Pechuga, Gallopinto y Tortilla", precio: 6.00 },
+        { id: "cc04", nombre: "Pechuga, Gallopinto y Maduro",   precio: 6.00 },
+        { id: "cc05", nombre: "Muslo, Gallopinto y Tortilla",   precio: 5.00 },
+        { id: "cc06", nombre: "Muslo, Gallopinto y Maduro",     precio: 5.00 },
+        { id: "cc07", nombre: "Cerdo, Gallopinto y Tortilla",   precio: 6.00 },
+        { id: "cc08", nombre: "Cerdo, Gallopinto y Maduro",     precio: 6.00 },
+        { id: "cc09", nombre: "Cerdo, Gallopinto y Tajadas",    precio: 6.00 },
+        { id: "cc10", nombre: "Carne con Maduro",               precio: 5.50 },
+        { id: "cc11", nombre: "Carne, Gallopinto y Maduro",     precio: 7.00 },
+        { id: "cc12", nombre: "Carne, Gallopinto y Tortilla",   precio: 7.00 },
+      ]
+    },
+
+    /* ─── CATEGORÍA 2 ──────────────────────────────────────── */
+    {
+      id: "sin-gallopinto",
+      nombre: "Sin Gallopinto",
+      productos: [
+        { id: "sg01", nombre: "Tajadas con carne",        precio: 5.50 },
+        { id: "sg02", nombre: "Carne Asada con Tortilla", precio: 5.50 },
+        { id: "sg03", nombre: "Pechuga con Tortilla",     precio: 5.00 },
+        { id: "sg04", nombre: "Cerdo con Tajadas",        precio: 5.50 },
+      ]
+    },
+
+    /* ─── CATEGORÍA 3 ──────────────────────────────────────── */
+    {
+      id: "fritanga",
+      nombre: "Fritanga",
+      productos: [
+        { id: "fr01", nombre: "Empanada de maduro", precio: 2.50 },
+        { id: "fr02", nombre: "Quesillo",           precio: 3.00 },
+        { id: "fr03", nombre: "Enchiladas",         precio: 3.00 },
+        { id: "fr04", nombre: "Tajadas con queso",  precio: 3.50 },
+        { id: "fr05", nombre: "Tacos",              precio: 2.50 },
+        { id: "fr06", nombre: "Torta de papa",      precio: 2.50 },
+        { id: "fr07", nombre: "Queso frito",        precio: 2.00 },
+        { id: "fr08", nombre: "Tortilla",           precio: 0.50 },
+      ]
+    },
+
+    /* ─── CATEGORÍA 4 ──────────────────────────────────────── */
+    {
+      id: "bebidas",
+      nombre: "Bebidas",
+      productos: [
+        { id: "be01", nombre: "Chía con tamarindo", precio: 1.50 },
+        { id: "be02", nombre: "Leche Agria",        precio: 2.00 },
+      ]
+    },
+
+    /* ── CÓMO AGREGAR UNA NUEVA CATEGORÍA ──────────────────────
+       Copia el bloque de abajo, descoméntalo y llénalo:
+
+    {
+      id: "nueva-categoria",
+      nombre: "Nombre de la categoría",
+      productos: [
+        { id: "nc01", nombre: "Producto 1", precio: 0.00 },
+        { id: "nc02", nombre: "Producto 2", precio: 0.00 },
+      ]
+    },
+       ────────────────────────────────────────────────────────── */
+
+  ] // ← no borres esta línea
+
+}; // ← no borres esta línea
+</script>
+<!-- ================================================================
+     FIN DE LA CONFIGURACIÓN
+     ================================================================ -->
+
+<script src="../js/restaurante.js"></script>
+</body>
+</html>

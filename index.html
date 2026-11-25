@@ -1,86 +1,237 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#141414">
-<meta name="description" content="Protocolos de seguridad laboral, prevención de riesgos y procedimientos de emergencia de Clínica Dental Hye.">
-<meta name="robots" content="index, follow">
-<title>Seguridad Laboral · Clínica Dental Hye</title>
-<link rel="icon" href="assets/img/favicon.svg" type="image/svg+xml">
-<link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1117">
+  <meta name="description" content="MiMenú · Tu restaurante en línea en 5 minutos. Menú digital + pedidos por WhatsApp sin comisiones.">
+  <title>MiMenú · Tu restaurante en línea</title>
+  <link rel="stylesheet" href="css/landing.css">
 </head>
 <body>
 
-<a class="skip-link" href="#contenido-principal">Saltar al contenido</a>
+<!-- NAV -->
+<nav class="nav">
+  <a href="#" class="nav__logo">
+    <span class="nav__logo-icon">🍽️</span>
+    <span class="nav__logo-text">Mi<span>Menú</span></span>
+  </a>
+  <ul class="nav__links">
+    <li><a href="#funciona">Cómo funciona</a></li>
+    <li><a href="#tarifas">Tarifas</a></li>
+    <li><a href="rinconnica/">Ver demo</a></li>
+  </ul>
+  <a href="rinconnica/" class="btn-nav">Ver demo →</a>
+</nav>
 
-<a class="barra-emergencia" href="#contactos-emergencia">
-  🚨 EMERGENCIA EN CURSO — Pulsa aquí para ver los números de emergencia
-</a>
-
-<header class="encabezado">
-  <div class="encabezado__logo" aria-hidden="true">
-    <img src="assets/img/logo-clinica.svg" alt="">
+<!-- HERO -->
+<section class="hero">
+  <div class="hero__tag">🇵🇦 Hecho para Panamá</div>
+  <h1 class="hero__title">Tu restaurante<br>en línea en <span>5 minutos</span></h1>
+  <p class="hero__subtitle">
+    Menú digital profesional + pedidos directos por WhatsApp.<br>
+    Sin comisiones, sin apps, sin complicaciones.
+  </p>
+  <div class="hero__ctas">
+    <a href="#tarifas" class="btn-primary">🚀 Empezar gratis</a>
+    <a href="rinconnica/" class="btn-outline">Ver ejemplo en vivo →</a>
   </div>
-  <p class="encabezado__universidad">Clínica Dental Hye</p>
-  <h1 class="encabezado__titulo">SEGURIDAD LABORAL</h1>
-  <p class="encabezado__subtitulo">Protocolos de Seguridad y Emergencia</p>
-  <p class="encabezado__intro">Consulta rápidamente los procedimientos de prevención y actuación ante situaciones de emergencia.</p>
-</header>
 
-<main id="contenido-principal" class="contenedor">
-
-  <section class="seccion" aria-labelledby="titulo-categorias">
-    <h2 id="titulo-categorias" class="solo-lectura-pantalla">Categorías</h2>
-    <p class="seccion__ayuda" style="margin-top:0;">Selecciona una categoría</p>
-    <div class="rejilla-categorias" id="rejilla-categorias" role="list">
-      <!-- Las tarjetas se generan dinámicamente desde js/app.js (ver PROTOCOLOS) -->
+  <!-- MOCKUP DEL TELÉFONO -->
+  <div class="preview-wrap">
+    <div class="preview-phone">
+      <div class="preview-header">
+        <div class="preview-header__name">El Rincón Nica</div>
+        <div class="preview-header__badge">● Abierto</div>
+      </div>
+      <div class="preview-tabs">
+        <div class="preview-tab active">Comida Completa</div>
+        <div class="preview-tab">Fritanga</div>
+        <div class="preview-tab">Bebidas</div>
+      </div>
+      <div class="preview-items">
+        <div class="preview-item">
+          <div class="preview-item__img">🥩</div>
+          <div class="preview-item__info">
+            <div class="preview-item__name">Carne asada</div>
+            <div class="preview-item__price">B/. 7.00</div>
+          </div>
+          <div class="preview-item__add">+</div>
+        </div>
+        <div class="preview-item">
+          <div class="preview-item__img">🍗</div>
+          <div class="preview-item__info">
+            <div class="preview-item__name">Pechuga Asada</div>
+            <div class="preview-item__price">B/. 6.00</div>
+          </div>
+          <div class="preview-item__add">+</div>
+        </div>
+        <div class="preview-item">
+          <div class="preview-item__img">🌮</div>
+          <div class="preview-item__info">
+            <div class="preview-item__name">Tacos</div>
+            <div class="preview-item__price">B/. 2.50</div>
+          </div>
+          <div class="preview-item__add">+</div>
+        </div>
+      </div>
+      <div class="preview-fab">
+        <span>🛒 2 artículos</span>
+        <span>B/. 13.50</span>
+      </div>
     </div>
-
-    <a class="boton-emergencia" href="#" data-abrir="contactos-emergencia">
-      📞 CONTACTOS DE EMERGENCIA
-    </a>
-  </section>
-
-  <section class="seccion" id="documentos" aria-labelledby="titulo-documentos">
-    <h2 id="titulo-documentos" class="seccion__titulo">📄 Documentos de seguridad</h2>
-    <p class="seccion__ayuda">Documentos oficiales disponibles para consulta y descarga.</p>
-    <div id="lista-documentos"><!-- generado desde js/app.js (ver DOCUMENTOS) --></div>
-  </section>
-
-</main>
-
-<!-- Vista de protocolo a pantalla completa (se reutiliza para todas las categorías) -->
-<div class="vista-protocolo" id="vista-protocolo" hidden role="dialog" aria-modal="true" aria-labelledby="vista-protocolo-titulo">
-  <div class="vista-protocolo__cabecera">
-    <button class="boton-volver" id="boton-volver" type="button">← Volver</button>
-    <h2 class="vista-protocolo__titulo" id="vista-protocolo-titulo"></h2>
   </div>
-  <div class="vista-protocolo__cuerpo" id="vista-protocolo-cuerpo">
-    <!-- contenido inyectado por js/app.js -->
-  </div>
-</div>
+</section>
 
-<!-- Visor de documento PDF a pantalla completa -->
-<div class="vista-protocolo" id="vista-documento" hidden role="dialog" aria-modal="true" aria-labelledby="vista-documento-titulo">
-  <div class="vista-protocolo__cabecera">
-    <button class="boton-volver" id="boton-volver-documento" type="button">← Volver</button>
-    <h2 class="vista-protocolo__titulo" id="vista-documento-titulo"></h2>
-  </div>
-  <div class="vista-protocolo__cuerpo">
-    <iframe class="visor-pdf" id="iframe-documento" title="Documento PDF" src=""></iframe>
-  </div>
-</div>
+<!-- FEATURES -->
+<section class="section">
+  <div class="section__label">¿Por qué MiMenú?</div>
+  <h2 class="section__title">Todo lo que necesita<br>tu negocio</h2>
+  <p class="section__subtitle">Sin comisiones por pedido. Sin apps que instalar. Tus clientes ordenan desde el navegador.</p>
 
-<footer class="pie">
-  <p class="pie__linea"><strong>Proyecto académico</strong></p>
-  <p class="pie__linea">[Nombre de la Universidad]</p>
-  <p class="pie__linea">[Facultad / Carrera]</p>
-  <p class="pie__linea">[Asignatura]</p>
-  <p class="pie__linea">[Integrantes]</p>
-  <p class="pie__linea">2026</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-card__icon">📱</div>
+      <div class="feature-card__title">Menú digital optimizado</div>
+      <div class="feature-card__text">Tu menú se ve perfecto en cualquier celular. Categorías, fotos y precios en segundos.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">💬</div>
+      <div class="feature-card__title">Pedidos por WhatsApp</div>
+      <div class="feature-card__text">Cada pedido llega directo a tu WhatsApp con todos los detalles listos para preparar.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">🚫💳</div>
+      <div class="feature-card__title">Sin comisiones</div>
+      <div class="feature-card__text">Pagas solo el plan mensual fijo. Ninguna comisión por pedido, sin importar cuántos vendas.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">⚡</div>
+      <div class="feature-card__title">Listo en minutos</div>
+      <div class="feature-card__text">Configura tu menú editando un archivo de texto. No necesitas conocimientos técnicos.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">📦</div>
+      <div class="feature-card__title">Delivery y Para llevar</div>
+      <div class="feature-card__text">Tus clientes eligen si quieren delivery o recoger. La dirección llega en el mensaje.</div>
+    </div>
+    <div class="feature-card">
+      <div class="feature-card__icon">🔗</div>
+      <div class="feature-card__title">Link propio</div>
+      <div class="feature-card__text">Recibe tu propia URL para compartir en redes sociales, WhatsApp, impresiones y QR.</div>
+    </div>
+  </div>
+</section>
+
+<!-- CÓMO FUNCIONA -->
+<section class="section" id="funciona">
+  <div class="section__label">Proceso simple</div>
+  <h2 class="section__title">¿Cómo funciona?</h2>
+  <p class="section__subtitle">En tres pasos tu restaurante está recibiendo pedidos.</p>
+
+  <div class="steps">
+    <div class="step">
+      <div class="step__num">1</div>
+      <div>
+        <div class="step__title">Llena tu menú</div>
+        <div class="step__text">Edita el bloque de configuración en el archivo HTML con el nombre de tu restaurante, productos, categorías y precios. No necesitas saber programar.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__num">2</div>
+      <div>
+        <div class="step__title">Publica y comparte</div>
+        <div class="step__text">Tu página queda publicada. Comparte el link en tus historias de Instagram, en tu bio, por WhatsApp o imprime un QR para las mesas.</div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step__num">3</div>
+      <div>
+        <div class="step__title">Recibe pedidos</div>
+        <div class="step__text">El cliente elige sus platos, llena sus datos y el pedido llega directamente a tu WhatsApp listo para confirmar y preparar.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TARIFAS -->
+<section class="pricing-bg" id="tarifas">
+  <div class="section">
+    <div class="section__label text-center" style="text-align:center">Precios</div>
+    <h2 class="section__title text-center" style="text-align:center">Planes simples y transparentes</h2>
+    <p class="section__subtitle text-center" style="text-align:center;margin:0 auto">Sin sorpresas. Sin comisiones por venta. Cancela cuando quieras.</p>
+
+    <div class="plans">
+
+      <!-- PLAN GRATIS -->
+      <div class="plan">
+        <div class="plan__name">Gratis</div>
+        <div class="plan__price">B/. <span>0</span></div>
+        <div class="plan__period">Para siempre</div>
+        <ul class="plan__features">
+          <li>1 página de restaurante</li>
+          <li>Menú con categorías y precios</li>
+          <li>Pedidos por WhatsApp</li>
+          <li>Delivery y Para llevar</li>
+          <li class="no">Fotos de productos</li>
+          <li class="no">Código QR personalizado</li>
+          <li class="no">Soporte prioritario</li>
+        </ul>
+        <button class="btn-plan" onclick="window.location.href='rinconnica/'">Empezar gratis</button>
+      </div>
+
+      <!-- PLAN PRO (destacado) -->
+      <div class="plan plan--featured">
+        <div class="plan__badge">⭐ Más popular</div>
+        <div class="plan__name">Pro</div>
+        <div class="plan__price">B/. <span>15</span> <small>/mes</small></div>
+        <div class="plan__period">Facturación mensual</div>
+        <ul class="plan__features">
+          <li>1 página de restaurante</li>
+          <li>Menú con categorías y precios</li>
+          <li>Pedidos por WhatsApp</li>
+          <li>Delivery y Para llevar</li>
+          <li>Fotos de productos</li>
+          <li>Código QR personalizado</li>
+          <li class="no">Soporte prioritario</li>
+        </ul>
+        <button class="btn-plan">Contratar Pro</button>
+      </div>
+
+      <!-- PLAN BUSINESS -->
+      <div class="plan">
+        <div class="plan__name">Business</div>
+        <div class="plan__price">B/. <span>35</span> <small>/mes</small></div>
+        <div class="plan__period">Hasta 5 restaurantes</div>
+        <ul class="plan__features">
+          <li>Hasta 5 páginas de restaurante</li>
+          <li>Todo el plan Pro incluido</li>
+          <li>Pedidos ilimitados</li>
+          <li>Código QR personalizado</li>
+          <li>Soporte prioritario por WhatsApp</li>
+          <li>Configuración asistida</li>
+        </ul>
+        <button class="btn-plan">Contratar Business</button>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta-section">
+  <h2 class="section__title" style="text-align:center">¿Listo para empezar?</h2>
+  <p class="section__subtitle" style="text-align:center;margin:0 auto 36px">Ve el sistema en acción con un restaurante real de ejemplo.</p>
+  <div class="hero__ctas" style="justify-content:center">
+    <a href="rinconnica/" class="btn-primary">🍽️ Ver demo en vivo</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer__logo">Mi<span>Menú</span></div>
+  <p class="footer__copy">© 2026 MiMenú · Hecho en Panamá 🇵🇦</p>
 </footer>
 
-<script src="js/app.js"></script>
 </body>
 </html>
