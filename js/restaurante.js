@@ -6,6 +6,13 @@
 (function () {
   'use strict';
 
+  /* Modo dinámico: menu/index.html carga RESTAURANTE desde Firestore
+     y llama window.__mimenu_render() después. Si RESTAURANTE ya está
+     presente (páginas estáticas como rinconnica/), se ejecuta directo. */
+  window.__mimenu_render = function () { init(); };
+  if (window.RESTAURANTE) { init(); }
+
+  function init() {
   const R = window.RESTAURANTE;
   if (!R) {
     document.body.innerHTML = '<p style="color:red;padding:20px;font-family:sans-serif">Error: falta la configuración del restaurante (window.RESTAURANTE).</p>';
@@ -473,5 +480,7 @@
   } else {
     renderPage();
   }
+
+  } /* fin init() */
 
 })();

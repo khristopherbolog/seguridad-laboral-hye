@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1117">
+  <title>Admin · MiMenú</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <style>
+    .admin-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: rgba(245,158,11,0.15); color: #f59e0b;
+      border: 1px solid rgba(245,158,11,0.3);
+      font-size: 11px; font-weight: 700; padding: 2px 10px; border-radius: 20px;
+      margin-left: 8px;
+    }
+    .search-bar {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .search-bar input { flex: 1; }
+    .user-row td:first-child { font-weight: 600; }
+    .link-cell { font-family: monospace; font-size: 12px; color: var(--accent); }
+    .actions-cell { display: flex; gap: 6px; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="app-nav">
+  <div style="display:flex;align-items:center;gap:8px">
+    <a href="../" class="app-nav__logo">Mi<span>Menú</span></a>
+    <span class="admin-badge">👑 Admin</span>
+  </div>
+  <div class="app-nav__right">
+    <span class="app-nav__email" id="nav-email"></span>
+    <button class="btn-logout" id="btn-logout">Salir</button>
+  </div>
+</nav>
+
+<!-- CARGANDO -->
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <span>Cargando panel de administrador…</span>
+</div>
+
+<!-- CONTENIDO -->
+<div class="page-wide" id="main" style="display:none">
+
+  <div style="margin-bottom:28px">
+    <div class="page__title">Panel de Administrador</div>
+    <div class="page__subtitle">Gestiona todos los restaurantes y usuarios registrados en MiMenú</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat-tile">
+      <div class="stat-tile__label">Total usuarios</div>
+      <div class="stat-tile__value" id="stat-total">—</div>
+      <div class="stat-tile__sub">registrados</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Plan gratis</div>
+      <div class="stat-tile__value" id="stat-gratis">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Plan Pro</div>
+      <div class="stat-tile__value" id="stat-pro">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Plan Business</div>
+      <div class="stat-tile__value" id="stat-business">—</div>
+    </div>
+    <div class="stat-tile">
+      <div class="stat-tile__label">Activos</div>
+      <div class="stat-tile__value" id="stat-activos">—</div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="usuarios">👥 Usuarios</button>
+    <button class="tab-btn" data-tab="restaurantes">🍽️ Restaurantes</button>
+  </div>
+
+  <!-- TAB: USUARIOS -->
+  <div class="tab-panel active" id="tab-usuarios">
+    <div class="card" style="padding:20px">
+      <div class="search-bar">
+        <input class="form-input" type="search" id="search-users" placeholder="Buscar por nombre, email o slug…">
+        <select class="form-select" id="filter-plan" style="width:160px">
+          <option value="">Todos los planes</option>
+          <option value="gratis">Gratis</option>
+          <option value="pro">Pro</option>
+          <option value="business">Business</option>
+        </select>
+      </div>
+
+      <div class="table-wrap">
+        <table id="users-table">
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Slug</th>
+              <th>Plan</th>
+              <th>Estado</th>
+              <th>Registrado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-users" style="display:none">
+          <div class="empty-state__icon">👥</div>
+          <div class="empty-state__text">No hay usuarios registrados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: RESTAURANTES -->
+  <div class="tab-panel" id="tab-restaurantes">
+    <div class="card" style="padding:20px">
+      <div class="search-bar">
+        <input class="form-input" type="search" id="search-rests" placeholder="Buscar restaurante…">
+      </div>
+      <div class="table-wrap">
+        <table id="rests-table">
+          <thead>
+            <tr>
+              <th>Restaurante</th>
+              <th>WhatsApp</th>
+              <th>Enlace público</th>
+              <th>Categorías</th>
+              <th>Estado</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="rests-tbody"></tbody>
+        </table>
+        <div class="empty-state" id="empty-rests" style="display:none">
+          <div class="empty-state__icon">🍽️</div>
+          <div class="empty-state__text">No hay restaurantes registrados</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- MODAL EDITAR PLAN -->
+<div id="modal-plan" style="display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:var(--dark-2);border:1px solid var(--border);border-radius:16px;padding:28px;width:100%;max-width:360px">
+    <div style="font-size:17px;font-weight:800;margin-bottom:16px">Cambiar plan</div>
+    <div class="form-group">
+      <label class="form-label">Usuario</label>
+      <input class="form-input" id="modal-user-email" readonly>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Plan</label>
+      <select class="form-select" id="modal-plan-val">
+        <option value="gratis">Gratis</option>
+        <option value="pro">Pro</option>
+        <option value="business">Business</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Estado</label>
+      <select class="form-select" id="modal-activo-val">
+        <option value="true">Activo</option>
+        <option value="false">Suspendido</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:4px">
+      <button class="btn btn-primary" id="modal-save">Guardar</button>
+      <button class="btn btn-secondary" id="modal-cancel">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+
+<script>
+(function () {
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+  let allUsers = [];
+  let allRests = [];
+  let editingUid = null;
+
+  /* ── AUTH GUARD — sólo admins ───────────────────────────── */
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = '../auth/login.html'; return; }
+    document.getElementById('nav-email').textContent = user.email;
+    document.getElementById('btn-logout').onclick = () => auth.signOut();
+
+    const adminSnap = await db.collection('admins').doc(user.uid).get();
+    if (!adminSnap.exists) {
+      /* No es admin → redirigir a dashboard */
+      window.location.href = '../dashboard/';
+      return;
+    }
+    await loadAll();
+  });
+
+  /* ── CARGAR DATOS ───────────────────────────────────────── */
+  async function loadAll() {
+    try {
+      const [usersSnap, restsSnap] = await Promise.all([
+        db.collection('users').orderBy('createdAt','desc').get(),
+        db.collection('restaurantes').get(),
+      ]);
+      allUsers = usersSnap.docs.map(d => ({ uid: d.id, ...d.data() }));
+      allRests = restsSnap.docs.map(d => ({ uid: d.id, ...d.data() }));
+      updateStats();
+      renderUsers(allUsers);
+      renderRests(allRests);
+    } catch (err) {
+      console.error(err);
+      alert('Error al cargar datos: ' + err.message);
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+    }
+  }
+
+  /* ── STATS ──────────────────────────────────────────────── */
+  function updateStats() {
+    document.getElementById('stat-total').textContent   = allUsers.length;
+    document.getElementById('stat-gratis').textContent  = allUsers.filter(u => u.plan === 'gratis').length;
+    document.getElementById('stat-pro').textContent     = allUsers.filter(u => u.plan === 'pro').length;
+    document.getElementById('stat-business').textContent = allUsers.filter(u => u.plan === 'business').length;
+    document.getElementById('stat-activos').textContent = allUsers.filter(u => u.activo).length;
+  }
+
+  /* ── RENDER USERS ───────────────────────────────────────── */
+  function renderUsers(list) {
+    const tbody = document.getElementById('users-tbody');
+    tbody.innerHTML = '';
+    document.getElementById('empty-users').style.display = list.length ? 'none' : 'block';
+    list.forEach(function (u) {
+      const tr = document.createElement('tr');
+      tr.className = 'user-row';
+      const fecha = u.createdAt ? new Date(u.createdAt.seconds * 1000).toLocaleDateString('es-PA') : '—';
+      tr.innerHTML = `
+        <td>${esc(u.displayName || '—')}</td>
+        <td>${esc(u.email || '—')}</td>
+        <td class="link-cell">${esc(u.slug || '—')}</td>
+        <td><span class="badge ${planBadge(u.plan)}">${u.plan || 'gratis'}</span></td>
+        <td><span class="badge ${u.activo ? 'badge-green':'badge-red'}">${u.activo ? 'Activo':'Suspendido'}</span></td>
+        <td>${fecha}</td>
+        <td>
+          <div class="actions-cell">
+            <button class="btn btn-secondary btn-sm" data-uid="${u.uid}" data-action="edit-plan">Plan</button>
+            <a href="../menu/?r=${esc(u.slug)}" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none">Ver</a>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── RENDER RESTAURANTES ────────────────────────────────── */
+  function renderRests(list) {
+    const tbody = document.getElementById('rests-tbody');
+    tbody.innerHTML = '';
+    document.getElementById('empty-rests').style.display = list.length ? 'none' : 'block';
+    list.forEach(function (r) {
+      const tr = document.createElement('tr');
+      const cats = (r.categorias || []).length;
+      const prods = (r.categorias || []).reduce((s, c) => s + (c.productos||[]).length, 0);
+      tr.innerHTML = `
+        <td>${esc(r.nombre || '—')}</td>
+        <td>${esc(r.whatsapp || '—')}</td>
+        <td class="link-cell">/m/${esc(r.slug || '—')}</td>
+        <td>${cats} cat. / ${prods} prod.</td>
+        <td><span class="badge ${r.abierto ? 'badge-green':'badge-grey'}">${r.abierto ? 'Abierto':'Cerrado'}</span></td>
+        <td>
+          <div class="actions-cell">
+            <a href="../menu/?r=${esc(r.slug)}" target="_blank" class="btn btn-secondary btn-sm" style="text-decoration:none">Ver menú</a>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  /* ── BÚSQUEDA Y FILTROS ─────────────────────────────────── */
+  document.getElementById('search-users').oninput = applyUserFilters;
+  document.getElementById('filter-plan').onchange  = applyUserFilters;
+
+  function applyUserFilters() {
+    const q    = document.getElementById('search-users').value.toLowerCase();
+    const plan = document.getElementById('filter-plan').value;
+    let filtered = allUsers;
+    if (q) filtered = filtered.filter(u =>
+      (u.displayName||'').toLowerCase().includes(q) ||
+      (u.email||'').toLowerCase().includes(q) ||
+      (u.slug||'').toLowerCase().includes(q));
+    if (plan) filtered = filtered.filter(u => (u.plan||'gratis') === plan);
+    renderUsers(filtered);
+  }
+
+  document.getElementById('search-rests').oninput = function () {
+    const q = this.value.toLowerCase();
+    renderRests(q ? allRests.filter(r => (r.nombre||'').toLowerCase().includes(q) || (r.slug||'').includes(q)) : allRests);
+  };
+
+  /* ── MODAL PLAN ─────────────────────────────────────────── */
+  document.getElementById('users-tbody').addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    if (btn.dataset.action === 'edit-plan') {
+      const uid = btn.dataset.uid;
+      const u   = allUsers.find(u => u.uid === uid);
+      if (!u) return;
+      editingUid = uid;
+      document.getElementById('modal-user-email').value  = u.email || '';
+      document.getElementById('modal-plan-val').value    = u.plan || 'gratis';
+      document.getElementById('modal-activo-val').value  = String(u.activo !== false);
+      document.getElementById('modal-plan').style.display = 'flex';
+    }
+  });
+
+  document.getElementById('modal-cancel').onclick = closeModal;
+  document.getElementById('modal-plan').onclick = function (e) {
+    if (e.target === this) closeModal();
+  };
+  function closeModal() {
+    document.getElementById('modal-plan').style.display = 'none';
+    editingUid = null;
+  }
+
+  document.getElementById('modal-save').onclick = async function () {
+    if (!editingUid) return;
+    const plan   = document.getElementById('modal-plan-val').value;
+    const activo = document.getElementById('modal-activo-val').value === 'true';
+    try {
+      await db.collection('users').doc(editingUid).update({ plan, activo });
+      const idx = allUsers.findIndex(u => u.uid === editingUid);
+      if (idx >= 0) { allUsers[idx].plan = plan; allUsers[idx].activo = activo; }
+      updateStats();
+      applyUserFilters();
+      closeModal();
+    } catch (err) {
+      alert('Error al actualizar: ' + err.message);
+    }
+  };
+
+  /* ── TABS ───────────────────────────────────────────────── */
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.onclick = function () {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    };
+  });
+
+  /* ── HELPERS ────────────────────────────────────────────── */
+  function esc(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function planBadge(plan) {
+    return plan === 'pro' ? 'badge-green' : plan === 'business' ? 'badge-warn' : 'badge-grey';
+  }
+})();
+</script>
+</body>
+</html>

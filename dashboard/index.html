@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1117">
+  <title>Mi panel · MiMenú</title>
+  <link rel="stylesheet" href="../css/app.css">
+  <style>
+    .plan-info { display: flex; align-items: center; gap: 10px; }
+    .slug-prefix { font-size: 13px; color: var(--text-faint); }
+    .slug-value  { font-size: 15px; font-weight: 700; color: var(--accent); }
+    .toggle-wrap { display: flex; align-items: center; gap: 10px; }
+    .toggle {
+      position: relative; width: 44px; height: 24px; cursor: pointer;
+    }
+    .toggle input { opacity: 0; width: 0; height: 0; }
+    .toggle-track {
+      position: absolute; inset: 0;
+      background: var(--dark-4); border-radius: 20px;
+      transition: background 0.2s;
+    }
+    .toggle input:checked + .toggle-track { background: var(--accent); }
+    .toggle-thumb {
+      position: absolute; top: 3px; left: 3px;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #fff;
+      transition: left 0.2s;
+      pointer-events: none;
+    }
+    .toggle input:checked ~ .toggle-thumb { left: 23px; }
+    .prod-actions { display: flex; gap: 6px; flex-shrink: 0; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="app-nav">
+  <a href="../" class="app-nav__logo">Mi<span>Menú</span></a>
+  <div class="app-nav__right">
+    <span class="app-nav__email" id="nav-email"></span>
+    <button class="btn-logout" id="btn-logout">Salir</button>
+  </div>
+</nav>
+
+<!-- CARGANDO -->
+<div class="loading-screen" id="loading">
+  <div class="spinner"></div>
+  <span>Cargando tu panel…</span>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="page" id="main" style="display:none">
+
+  <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:28px">
+    <div>
+      <div class="page__title" id="rest-nombre">Mi Restaurante</div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <span class="slug-prefix">mimenu.app/m/</span>
+        <span class="slug-value" id="rest-slug">...</span>
+        <span class="badge badge-grey" id="plan-badge">gratis</span>
+      </div>
+    </div>
+    <a id="btn-ver-menu" href="#" target="_blank" class="btn btn-secondary" style="text-decoration:none">
+      Ver mi menú →
+    </a>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs-nav">
+    <button class="tab-btn active" data-tab="restaurante">🏪 Restaurante</button>
+    <button class="tab-btn" data-tab="menu">🍽️ Menú</button>
+    <button class="tab-btn" data-tab="enlace">🔗 Mi Enlace</button>
+  </div>
+
+  <!-- TAB: RESTAURANTE -->
+  <div class="tab-panel active" id="tab-restaurante">
+    <div class="card">
+      <div class="card__title">Información básica</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Nombre del restaurante</label>
+          <input id="f-nombre" class="form-input" type="text" placeholder="El Rincón Nica">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Número de WhatsApp</label>
+          <input id="f-whatsapp" class="form-input" type="tel" placeholder="50768001234">
+          <div class="form-hint">Con código de país, sin el +. Ej: 50768001234</div>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Horario</label>
+          <input id="f-horario" class="form-input" type="text" placeholder="Lun – Sáb · 7:00 AM – 8:00 PM">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Moneda</label>
+          <select id="f-moneda" class="form-select">
+            <option value="B/.">Balboa (B/.)</option>
+            <option value="$">Dólar ($)</option>
+            <option value="C$">Córdoba (C$)</option>
+            <option value="L">Lempira (L)</option>
+            <option value="Q">Quetzal (Q)</option>
+            <option value="₡">Colón (₡)</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descripción corta</label>
+        <input id="f-descripcion" class="form-input" type="text" placeholder="Comida típica nicaragüense en Panamá">
+      </div>
+      <div class="form-group">
+        <label class="form-label">URL de imagen de portada (opcional)</label>
+        <input id="f-cover" class="form-input" type="url" placeholder="https://...">
+        <div class="form-hint">Pega la URL de una imagen ya publicada. Dejar vacío para usar fondo verde.</div>
+      </div>
+      <div class="form-group">
+        <div class="toggle-wrap">
+          <label class="toggle">
+            <input type="checkbox" id="f-abierto">
+            <div class="toggle-track"></div>
+            <div class="toggle-thumb"></div>
+          </label>
+          <span style="font-size:14px">Restaurante abierto (visible en el menú)</span>
+        </div>
+      </div>
+
+      <div class="alert alert-success" id="rest-saved" style="margin-top:8px">
+        <span>✓</span><span>Cambios guardados</span>
+      </div>
+
+      <button class="btn btn-primary" id="btn-save-rest" style="margin-top:4px">Guardar cambios</button>
+    </div>
+  </div>
+
+  <!-- TAB: MENÚ -->
+  <div class="tab-panel" id="tab-menu">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+      <div style="font-size:14px;color:var(--text-muted)">
+        Categorías y productos de tu menú
+      </div>
+      <button class="btn btn-secondary btn-sm" id="btn-add-cat">+ Agregar categoría</button>
+    </div>
+
+    <div id="categorias-wrap">
+      <div class="empty-state" id="empty-menu">
+        <div class="empty-state__icon">🍽️</div>
+        <div class="empty-state__text">Tu menú está vacío</div>
+        <div class="empty-state__sub">Agrega tu primera categoría para comenzar</div>
+      </div>
+    </div>
+
+    <div class="alert alert-success" id="menu-saved" style="margin-top:16px">
+      <span>✓</span><span>Menú guardado</span>
+    </div>
+    <button class="btn btn-primary" id="btn-save-menu" style="margin-top:8px">Guardar menú</button>
+  </div>
+
+  <!-- TAB: ENLACE -->
+  <div class="tab-panel" id="tab-enlace">
+    <div class="card">
+      <div class="card__title">Tu enlace público</div>
+      <p style="font-size:14px;color:var(--text-muted);margin-bottom:16px">
+        Comparte este enlace con tus clientes, ponlo en tu bio de Instagram o imprímelo como QR.
+      </p>
+      <div class="link-box" id="link-box">
+        <span class="link-box__url" id="link-url"></span>
+        <button class="link-box__copy" id="btn-copy" title="Copiar enlace">📋</button>
+      </div>
+      <div id="copy-ok" style="font-size:12px;color:var(--accent);margin-top:6px;display:none">¡Enlace copiado!</div>
+
+      <hr class="card__divider">
+
+      <div class="card__title">Cambiar tu enlace</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px">
+        Puedes cambiar tu slug una vez. Aviso: los clientes que tengan guardado el enlace anterior
+        no podrán acceder hasta que lo compartas nuevamente.
+      </p>
+      <div class="form-group">
+        <label class="form-label">Nuevo slug</label>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:12px;color:var(--text-faint);white-space:nowrap">mimenu.app/m/</span>
+          <input id="new-slug" class="form-input" type="text" placeholder="nuevo-slug"
+                 pattern="[a-z0-9\-]{3,30}" required>
+        </div>
+        <div class="form-error visible" id="slug-err-msg" style="display:none"></div>
+      </div>
+      <button class="btn btn-secondary" id="btn-change-slug">Actualizar enlace</button>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<script src="../js/firebase-config.js"></script>
+
+<script>
+(function () {
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+  let currentUid = null;
+  let restauranteData = {};
+
+  /* ── AUTH GUARD ─────────────────────────────────────────── */
+  auth.onAuthStateChanged(async function (user) {
+    if (!user) { window.location.href = '../auth/login.html'; return; }
+    currentUid = user.uid;
+    document.getElementById('nav-email').textContent = user.email;
+    document.getElementById('btn-logout').onclick = () => auth.signOut();
+    await loadData();
+  });
+
+  /* ── LOAD DATA ──────────────────────────────────────────── */
+  async function loadData() {
+    try {
+      const snap = await db.collection('restaurantes').doc(currentUid).get();
+      if (!snap.exists) {
+        window.location.href = '../auth/register.html';
+        return;
+      }
+      restauranteData = snap.data();
+      fillRestForm(restauranteData);
+      renderMenuEditor(restauranteData.categorias || []);
+      renderEnlace(restauranteData.slug);
+
+      /* plan badge */
+      const userSnap = await db.collection('users').doc(currentUid).get();
+      const plan = userSnap.exists ? userSnap.data().plan : 'gratis';
+      document.getElementById('plan-badge').textContent = plan;
+      document.getElementById('plan-badge').className = 'badge ' + (plan === 'gratis' ? 'badge-grey' : 'badge-green');
+
+    } catch (err) {
+      console.error(err);
+    } finally {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('main').style.display = 'block';
+    }
+  }
+
+  /* ── FILL FORM ──────────────────────────────────────────── */
+  function fillRestForm(d) {
+    document.getElementById('rest-nombre').textContent  = d.nombre || 'Mi Restaurante';
+    document.getElementById('rest-slug').textContent    = d.slug   || '';
+    document.getElementById('f-nombre').value      = d.nombre      || '';
+    document.getElementById('f-whatsapp').value    = d.whatsapp    || '';
+    document.getElementById('f-horario').value     = d.horario     || '';
+    document.getElementById('f-descripcion').value = d.descripcion || '';
+    document.getElementById('f-cover').value       = d.cover       || '';
+    document.getElementById('f-abierto').checked   = !!d.abierto;
+    const sel = document.getElementById('f-moneda');
+    if (d.moneda) sel.value = d.moneda;
+  }
+
+  /* ── SAVE RESTAURANTE ───────────────────────────────────── */
+  document.getElementById('btn-save-rest').onclick = async function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+    document.getElementById('rest-saved').classList.remove('visible');
+
+    try {
+      const updated = {
+        nombre:      esc(document.getElementById('f-nombre').value),
+        whatsapp:    document.getElementById('f-whatsapp').value.replace(/\D/g,''),
+        horario:     esc(document.getElementById('f-horario').value),
+        descripcion: esc(document.getElementById('f-descripcion').value),
+        cover:       document.getElementById('f-cover').value.trim(),
+        moneda:      document.getElementById('f-moneda').value,
+        abierto:     document.getElementById('f-abierto').checked,
+        updatedAt:   firebase.firestore.FieldValue.serverTimestamp(),
+      };
+      await db.collection('restaurantes').doc(currentUid).update(updated);
+      Object.assign(restauranteData, updated);
+      document.getElementById('rest-nombre').textContent = updated.nombre;
+      document.getElementById('rest-saved').classList.add('visible');
+      setTimeout(() => document.getElementById('rest-saved').classList.remove('visible'), 2500);
+    } catch (err) {
+      alert('Error al guardar: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar cambios';
+    }
+  };
+
+  /* ── MENU EDITOR ────────────────────────────────────────── */
+  let categorias = [];
+
+  function renderMenuEditor(cats) {
+    categorias = JSON.parse(JSON.stringify(cats || []));
+    const wrap = document.getElementById('categorias-wrap');
+    wrap.innerHTML = '';
+    document.getElementById('empty-menu').style.display = categorias.length ? 'none' : 'block';
+
+    categorias.forEach(function (cat, ci) {
+      const block = document.createElement('div');
+      block.className = 'categoria-block';
+      block.innerHTML = `
+        <div class="categoria-header" data-ci="${ci}">
+          <input class="form-input" type="text" value="${esc(cat.nombre)}"
+            style="max-width:200px;font-size:14px;font-weight:700" data-field="cat-nombre" data-ci="${ci}">
+          <span style="flex:1"></span>
+          <button class="btn btn-danger btn-sm" data-ci="${ci}" data-action="del-cat">Eliminar</button>
+          <span class="categoria-toggle open" data-ci="${ci}">▶</span>
+        </div>
+        <div class="categoria-body open" id="catbody-${ci}">
+          <div id="prods-${ci}"></div>
+          <button class="btn btn-secondary btn-sm" data-ci="${ci}" data-action="add-prod" style="margin-top:8px">
+            + Agregar producto
+          </button>
+        </div>`;
+      wrap.appendChild(block);
+      renderProductos(ci);
+    });
+
+    /* Event delegation */
+    wrap.onclick = function (e) {
+      const btn = e.target.closest('[data-action]');
+      if (!btn) return;
+      const ci = +btn.dataset.ci;
+      const pi = btn.dataset.pi !== undefined ? +btn.dataset.pi : null;
+      if (btn.dataset.action === 'del-cat') {
+        categorias.splice(ci, 1);
+        renderMenuEditor(categorias);
+      } else if (btn.dataset.action === 'add-prod') {
+        const uid = 'p' + Date.now();
+        categorias[ci].productos.push({ id: uid, nombre: '', precio: 0 });
+        renderProductos(ci);
+        document.getElementById('empty-menu').style.display = 'none';
+      } else if (btn.dataset.action === 'del-prod') {
+        categorias[ci].productos.splice(pi, 1);
+        renderProductos(ci);
+      }
+    };
+
+    wrap.oninput = function (e) {
+      const el = e.target;
+      if (el.dataset.field === 'cat-nombre') {
+        const ci = +el.dataset.ci;
+        categorias[ci].nombre = el.value;
+      } else if (el.dataset.field === 'prod-nombre') {
+        const ci = +el.dataset.ci, pi = +el.dataset.pi;
+        categorias[ci].productos[pi].nombre = el.value;
+      } else if (el.dataset.field === 'prod-precio') {
+        const ci = +el.dataset.ci, pi = +el.dataset.pi;
+        categorias[ci].productos[pi].precio = parseFloat(el.value) || 0;
+      } else if (el.dataset.field === 'prod-desc') {
+        const ci = +el.dataset.ci, pi = +el.dataset.pi;
+        categorias[ci].productos[pi].descripcion = el.value;
+      }
+    };
+  }
+
+  function renderProductos(ci) {
+    const wrap = document.getElementById('prods-' + ci);
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    (categorias[ci].productos || []).forEach(function (p, pi) {
+      const row = document.createElement('div');
+      row.className = 'producto-row';
+      row.innerHTML = `
+        <input class="form-input" type="text" placeholder="Nombre del producto"
+          value="${esc(p.nombre)}" data-field="prod-nombre" data-ci="${ci}" data-pi="${pi}">
+        <input class="form-input" type="number" placeholder="Precio" step="0.01" min="0"
+          value="${p.precio || ''}" data-field="prod-precio" data-ci="${ci}" data-pi="${pi}" style="width:90px">
+        <input class="form-input" type="text" placeholder="Descripción (opcional)"
+          value="${esc(p.descripcion||'')}" data-field="prod-desc" data-ci="${ci}" data-pi="${pi}" style="max-width:160px">
+        <div class="prod-actions">
+          <button class="btn btn-danger btn-sm" data-action="del-prod" data-ci="${ci}" data-pi="${pi}">✕</button>
+        </div>`;
+      wrap.appendChild(row);
+    });
+  }
+
+  document.getElementById('btn-add-cat').onclick = function () {
+    const uid = 'cat' + Date.now();
+    categorias.push({ id: uid, nombre: 'Nueva categoría', productos: [] });
+    renderMenuEditor(categorias);
+    document.getElementById('empty-menu').style.display = 'none';
+  };
+
+  document.getElementById('btn-save-menu').onclick = async function () {
+    const btn = this;
+    btn.disabled = true;
+    btn.textContent = 'Guardando…';
+    document.getElementById('menu-saved').classList.remove('visible');
+    try {
+      /* Limpiar productos vacíos */
+      const clean = categorias.map(c => ({
+        ...c,
+        productos: (c.productos || []).filter(p => p.nombre.trim()),
+      })).filter(c => c.nombre.trim());
+
+      await db.collection('restaurantes').doc(currentUid).update({
+        categorias: clean,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      categorias = clean;
+      document.getElementById('menu-saved').classList.add('visible');
+      setTimeout(() => document.getElementById('menu-saved').classList.remove('visible'), 2500);
+    } catch (err) {
+      alert('Error al guardar menú: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Guardar menú';
+    }
+  };
+
+  /* ── ENLACE ─────────────────────────────────────────────── */
+  function renderEnlace(slug) {
+    const url = window.location.origin + '/menu/?r=' + (slug || '');
+    document.getElementById('link-url').textContent = url;
+    document.getElementById('btn-ver-menu').href = url;
+  }
+
+  document.getElementById('btn-copy').onclick = function () {
+    const url = document.getElementById('link-url').textContent;
+    navigator.clipboard.writeText(url).then(function () {
+      document.getElementById('copy-ok').style.display = 'block';
+      setTimeout(() => document.getElementById('copy-ok').style.display = 'none', 2000);
+    });
+  };
+
+  document.getElementById('new-slug').addEventListener('input', function () {
+    this.value = this.value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-');
+    document.getElementById('slug-err-msg').style.display = 'none';
+  });
+
+  document.getElementById('btn-change-slug').onclick = async function () {
+    const btn = this;
+    const newSlug = document.getElementById('new-slug').value.trim();
+    const errEl = document.getElementById('slug-err-msg');
+    errEl.style.display = 'none';
+    if (!newSlug || newSlug.length < 3) {
+      errEl.textContent = 'El slug debe tener al menos 3 caracteres.';
+      errEl.style.display = 'block';
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = 'Verificando…';
+    try {
+      const snap = await db.collection('restaurantes').where('slug','==',newSlug).limit(1).get();
+      if (!snap.empty) {
+        errEl.textContent = 'Ese enlace ya está en uso. Prueba otro.';
+        errEl.style.display = 'block';
+        return;
+      }
+      await db.collection('restaurantes').doc(currentUid).update({ slug: newSlug, updatedAt: firebase.firestore.FieldValue.serverTimestamp() });
+      await db.collection('users').doc(currentUid).update({ slug: newSlug });
+      restauranteData.slug = newSlug;
+      document.getElementById('rest-slug').textContent = newSlug;
+      renderEnlace(newSlug);
+      document.getElementById('new-slug').value = '';
+      alert('Enlace actualizado a: mimenu.app/m/' + newSlug);
+    } catch (err) {
+      alert('Error: ' + err.message);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Actualizar enlace';
+    }
+  };
+
+  /* ── TABS ───────────────────────────────────────────────── */
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.onclick = function () {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    };
+  });
+
+  /* ── HELPERS ────────────────────────────────────────────── */
+  function esc(str) {
+    if (!str) return '';
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+})();
+</script>
+</body>
+</html>
